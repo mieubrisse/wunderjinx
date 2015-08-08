@@ -1,3 +1,5 @@
 ---
 client_id: 
 access_token: 
+rabbitmq_host:
+queue:
