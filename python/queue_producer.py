@@ -17,7 +17,7 @@ class WunderlistQueueProducer:
         self.rabbitmq_host = rabbitmq_host
         self.queue = queue
 
-    def create_task(self, title, list_id, due_date=None, starred=None):
+    def create_task(self, title, list_id, due_date=None, starred=None, note=None):
         ''' 
         Add a new Wunderlist action to the queue 
 

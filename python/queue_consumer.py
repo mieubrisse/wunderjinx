@@ -33,8 +33,12 @@ class WunderlistQueueConsumer:
         task_created = False
         while not task_created:
             try:
-                # time.sleep(10)
-                self.wunderclient.create_task(task[wunderpy2.Task.list_id], task[wunderpy2.Task.title])
+                self.wunderclient.create_task(
+                        task.get(wunderpy2.Task.list_id), 
+                        task.get(wunderpy2.Task.title),
+                        starred=task.get(wunderpy2.Task.starred),
+                        due_date=task.get(wunderpy2.Task.due_date)
+                        )
                 task_created = True
             except (wunderpy2.exceptions.ConnectionError, wunderpy2.exceptions.TimeoutError) as e:
                 self.connection.sleep(10)

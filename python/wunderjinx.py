@@ -6,7 +6,7 @@ import datetime
 import os
 import sys
 
-import list_resolver
+import list_resolver as wj_resolver
 import queue_producer
 import config as wj_config
 
@@ -80,7 +80,10 @@ def main(argv=sys.argv):
     due_date = args[ADD_TASK_DUE_DATE_ARGVAR]
     list_name = args[ADD_TASK_LIST_ARGVAR]
 
-    list_resolver = list_resolver.WunderlistListResolver(access_token, client_id)
+    print "Starred: {}".format(starred)
+    print "Note: {}".format(note)
+
+    list_resolver = wj_resolver.WunderlistListResolver(access_token, client_id)
     list_id = list_resolver.resolve(list_name)
 
     producer.create_task(title, list_id, due_date=due_date, starred=starred)
