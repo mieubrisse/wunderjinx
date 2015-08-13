@@ -11,7 +11,9 @@ import json
 import time
 import argparse
 import os.path
+
 import config as wj_config
+import model as wj_model
 
 class WunderlistQueueConsumer:
     ''' 
@@ -34,10 +36,10 @@ class WunderlistQueueConsumer:
         while not task_created:
             try:
                 self.wunderclient.create_task(
-                        task.get(wunderpy2.Task.list_id), 
-                        task.get(wunderpy2.Task.title),
-                        starred=task.get(wunderpy2.Task.starred),
-                        due_date=task.get(wunderpy2.Task.due_date)
+                        task.get(wj_model.CreateTaskKeys.LIST_ID), 
+                        task.get(wj_model.CreateTaskKeys.TITLE),
+                        starred=task.get(wj_model.CreateTaskKeys.STARRED),
+                        due_date=task.get(wj_model.CreateTaskKeys.DUE_DATE)
                         )
                 task_created = True
             except (wunderpy2.exceptions.ConnectionError, wunderpy2.exceptions.TimeoutError) as e:

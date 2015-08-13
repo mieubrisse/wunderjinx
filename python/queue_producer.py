@@ -7,6 +7,8 @@ import pika
 import wunderpy2
 import json
 
+import model as wj_model
+
 class WunderlistQueueProducer:
     def __init__(self, rabbitmq_host, queue):
         '''
@@ -36,10 +38,10 @@ class WunderlistQueueProducer:
         channel.queue_declare(queue=self.queue, durable=True)
         channel.confirm_delivery()
         wunderlist_obj = {
-                wunderpy2.Task.title : title,
-                wunderpy2.Task.due_date : due_date,
-                wunderpy2.Task.starred : starred,
-                wunderpy2.Task.list_id : int(list_id),
+                wj_model.CreateTaskKeys.TITLE : title,
+                wj_model.CreateTaskKeys.DUE_DATE : due_date,
+                wj_model.CreateTaskKeys.STARRED : starred,
+                wj_model.CreateTaskKeys.LIST_ID : int(list_id),
                 }
         publish_confirmed = channel.basic_publish(exchange='', 
                 routing_key=self.queue, 
