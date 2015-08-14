@@ -29,19 +29,19 @@ class WunderlistQueueProducer:
         if len(title.strip()) == 0:
             raise ValueError('Task title cannot be empty')
 
-        print 'Creating a task!'
-
         # TODO I probably want to pull out the probably-heavyweight connection-opening stuff into a separate method and have the user call a 'close()'
         #  method, but for now we'll leave it
         connection = pika.BlockingConnection(pika.ConnectionParameters(self.rabbitmq_host))
         channel = connection.channel()
         channel.queue_declare(queue=self.queue, durable=True)
         channel.confirm_delivery()
+        # TODO Use new message format
         wunderlist_obj = {
                 wj_model.CreateTaskKeys.TITLE : title,
                 wj_model.CreateTaskKeys.DUE_DATE : due_date,
                 wj_model.CreateTaskKeys.STARRED : starred,
                 wj_model.CreateTaskKeys.LIST_ID : int(list_id),
+                wj_model.CreateTaskKeys.NOTE : note,
                 }
         publish_confirmed = channel.basic_publish(exchange='', 
                 routing_key=self.queue, 

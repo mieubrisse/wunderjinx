@@ -80,13 +80,10 @@ def main(argv=sys.argv):
     due_date = args[ADD_TASK_DUE_DATE_ARGVAR]
     list_name = args[ADD_TASK_LIST_ARGVAR]
 
-    print "Starred: {}".format(starred)
-    print "Note: {}".format(note)
-
     list_resolver = wj_resolver.WunderlistListResolver(access_token, client_id)
     list_id = list_resolver.resolve(list_name)
 
-    producer.create_task(title, list_id, due_date=due_date, starred=starred)
+    producer.create_task(title, list_id, due_date=due_date, starred=starred, note=note)
 
     return 0
 

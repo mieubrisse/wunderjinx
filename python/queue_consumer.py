@@ -26,28 +26,45 @@ class WunderlistQueueConsumer:
         self.rabbitmq_host = rabbitmq_host
         self.wunderclient = wunderpy2.WunderClient(wunderlist_access_token, wunderlist_client_id)
 
-    def _handle_task(self, channel, method, properties, body):
+    def _handle_create_task(body):
+        ''' Helper method to do the gruntwork for creating a task '''
+        # TODO Print thing
+        list_id = body.get(wj_model.CreateTaskKeys.LIST_ID)
+        title = body.get(wj_model.CreateTaskKeys.TITLE)
+        starred = body.get(wj_model.CreateTaskKeys.STARRED)
+        due_date = body.get(wj_model.CreateTaskKeys.DUE_DATE)
+        note = body.get(wj_model.CreateTaskKeys.NOTE)
+
+        new_task = self.wunderclient.create_task(list_id, title, starred=starred, due_date=due_date)
+        # TODO If the connection is cut right here, we'll end up with duplicate tasks. It's a slim possibility, but there should be a better way of handling adding notes.
+        if task_note:
+            new_task_id = new_task[wunderpy2.model.Task.id]
+            self.wunderclient.create_note(new_task_id, note)
+
+    def _handle_message(self, channel, method, properties, body):
         ''' This function gets run on every Wunderlist task to be uploaded '''
-        task = json.loads(body)
-        print "Task delivered:"
-        print task
-        sys.stdout.flush()
-        task_created = False
-        while not task_created:
+        message = json.loads(body)
+        # TODO Put this in a logger
+        print "Handling message:"
+        print message
+
+        message_type = message[wj_model.MessageKeys.TYPE]
+        message_timestamp = message[wj_model.MessageKeys.CREATION_TIMESTAMP]
+        message_body = message[wj_model.MessageKeys.BODY]
+
+        message_handled = False
+        while not message_handled:
             try:
-                self.wunderclient.create_task(
-                        task.get(wj_model.CreateTaskKeys.LIST_ID), 
-                        task.get(wj_model.CreateTaskKeys.TITLE),
-                        starred=task.get(wj_model.CreateTaskKeys.STARRED),
-                        due_date=task.get(wj_model.CreateTaskKeys.DUE_DATE)
-                        )
-                task_created = True
+                if message_type == wj_model.MessageTypes.CREATE_TASK:
+                    self._handle_create_task(message_body)
+                message_handled = True
             except (wunderpy2.exceptions.ConnectionError, wunderpy2.exceptions.TimeoutError) as e:
                 self.connection.sleep(10)
         channel.basic_ack(delivery_tag = method.delivery_tag)
+
+        # TODO Make this a logger
         print "Created new task:"
         print json.dumps(body)
-        sys.stdout.flush()
 
     def consume(self):
         ''' Start continuously consuming queue actions '''
@@ -57,7 +74,7 @@ class WunderlistQueueConsumer:
         # We want an ack'd queue, so messages won't be deleted until they're successfully on the Wunderlist server
         # TODO basic_consume will call the callback as soon as the message is delivered, which means that you can't enforce ordering with it alone (as will be needed when this becomes a full-fledged offline client). Instead, I must write my own loop to consume messages one at a time: 
         # http://stackoverflow.com/questions/26977708/how-to-consume-rabbitmq-messages-via-pika-for-some-limited-time
-        channel.basic_consume(self._handle_task, queue=self.queue)
+        channel.basic_consume(self._handle_message, queue=self.queue)
         try:
             channel.start_consuming()
         except KeyboardInterrupt:

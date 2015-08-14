@@ -1,5 +1,6 @@
 class MessageTypes:
     CREATE_TASK = "create_task"
+    # TODO Update, delete, etc.
 
 class MessageKeys:
     TYPE = "type"   # MessageTypes
