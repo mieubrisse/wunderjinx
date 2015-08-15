@@ -18,17 +18,25 @@ ADD_TASK_TITLE_ARGVAR = 'add_task_title'
 ADD_TASK_NOTE_ARGVAR = 'add_task_note'
 ADD_TASK_LIST_ARGVAR = 'add_task_list'
 
-today = datetime.datetime.now().strftime('%Y-%m-%d')
+today = datetime.datetime.now().date()
+tomorrow = today + datetime.timedelta(days=1)
+today_str = today.strftime('%Y-%m-%d')
+tomorrow_str = tomorrow.strftime('%Y-%m-%d')
+
 script_dir = os.path.dirname(os.path.realpath(__file__))
 default_config_filepath = os.path.join(script_dir, "config.yaml")
 
 def _parse_args():
     ''' Parses command line arguments with argparse '''
     parser = argparse.ArgumentParser()
-    parser.add_argument('--config', dest=CONFIG_FILEPATH_ARGVAR, default=default_config_filepath, metavar="<config file>", help="YAML config file to use")
+
+    # TODO This is disabled for now until I get a better way to do config files that lets me set the filepaths
+    # parser.add_argument('--config', dest=CONFIG_FILEPATH_ARGVAR, default=default_config_filepath, metavar="<config file>", help="YAML config file to use")
+
     parser.add_argument('-s', '--starred', action='store_true', dest=ADD_TASK_STARRED_ARGVAR, default=None, help="whether the task is starred or not")
     parser.add_argument('-d', '--due-date', metavar='<due date>', dest=ADD_TASK_DUE_DATE_ARGVAR, help="set task's due date")
-    parser.add_argument('-t', '--today', action='store_const', const=today, dest=ADD_TASK_DUE_DATE_ARGVAR, help="set the task's due date to today")
+    parser.add_argument('-t', '--today', action='store_const', const=today_str, dest=ADD_TASK_DUE_DATE_ARGVAR, help="set the task's due date to today")
+    parser.add_argument('-m', '--tomorrow', action='store_const', const=tomorrow_str, dest=ADD_TASK_DUE_DATE_ARGVAR, help="set the task's due date to today")
     parser.add_argument('-l', '--list', dest=ADD_TASK_LIST_ARGVAR, metavar='<list>', default=['inbox'], nargs='+', help='task note')
     parser.add_argument('-n', '--note', nargs='+', dest=ADD_TASK_NOTE_ARGVAR, metavar='note', help='task note')
     parser.add_argument(ADD_TASK_TITLE_ARGVAR, nargs='+', metavar='title', help='task title')
@@ -54,7 +62,7 @@ def _validate_args(args):
 
 def main(argv=sys.argv):
     ''' 
-    Main driver for script 
+    Main driver for script, and entry point for pip package
 
     Return:
     Zero if all was successful, non-zero integer otherwise
@@ -64,12 +72,12 @@ def main(argv=sys.argv):
     if error_code:
         return error_code
 
-    config_filepath = args[CONFIG_FILEPATH_ARGVAR]
-    config = wj_config.load_config(config_filepath)
-    rabbitmq_host = config[wj_config.ConfigKeys.RABBITMQ_HOST]
-    queue = config[wj_config.ConfigKeys.QUEUE]
-    access_token = config[wj_config.ConfigKeys.ACCESS_TOKEN]
-    client_id = config[wj_config.ConfigKeys.CLIENT_ID]
+    # TODO Reimplement customizable config filepath
+    # config_filepath = args[CONFIG_FILEPATH_ARGVAR]
+    rabbitmq_host = wj_config.RABBITMQ_HOST
+    queue = wj_config.QUEUE
+    access_token = wj_config.ACCESS_TOKEN
+    client_id = wj_config.CLIENT_ID
 
     producer = queue_producer.WunderlistQueueProducer(rabbitmq_host, queue)
 

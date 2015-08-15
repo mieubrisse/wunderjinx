@@ -7,6 +7,8 @@ import pika
 import wunderpy2
 import json
 
+import datetime
+
 import model as wj_model
 
 class WunderlistQueueProducer:
@@ -35,17 +37,20 @@ class WunderlistQueueProducer:
         channel = connection.channel()
         channel.queue_declare(queue=self.queue, durable=True)
         channel.confirm_delivery()
-        # TODO Use new message format
-        wunderlist_obj = {
-                wj_model.CreateTaskKeys.TITLE : title,
-                wj_model.CreateTaskKeys.DUE_DATE : due_date,
-                wj_model.CreateTaskKeys.STARRED : starred,
-                wj_model.CreateTaskKeys.LIST_ID : int(list_id),
-                wj_model.CreateTaskKeys.NOTE : note,
+        message = {
+                wj_model.MessageKeys.TYPE : wj_model.MessageTypes.CREATE_TASK,
+                wj_model.MessageKeys.CREATION_TIMESTAMP : datetime.datetime.now().strftime(wj_model.TIMESTAMP_FORMAT),
+                wj_model.MessageKeys.BODY : {
+                    wj_model.CreateTaskKeys.TITLE : title,
+                    wj_model.CreateTaskKeys.DUE_DATE : due_date,
+                    wj_model.CreateTaskKeys.STARRED : starred,
+                    wj_model.CreateTaskKeys.LIST_ID : int(list_id),
+                    wj_model.CreateTaskKeys.NOTE : note,
+                    }
                 }
         publish_confirmed = channel.basic_publish(exchange='', 
                 routing_key=self.queue, 
-                body=json.dumps(wunderlist_obj), 
+                body=json.dumps(message), 
                 properties=pika.BasicProperties(
                     delivery_mode = 2 # Persistent messages
                 ))

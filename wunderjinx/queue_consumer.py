@@ -11,6 +11,7 @@ import json
 import time
 import argparse
 import os.path
+from dateutil import parser as date_parser
 
 import config as wj_config
 import model as wj_model
@@ -24,9 +25,9 @@ class WunderlistQueueConsumer:
         ''' Create a new QueueConsumer connected to the given queue and Wunderlist account specified by the given access token and client iD '''
         self.queue = queue
         self.rabbitmq_host = rabbitmq_host
-        self.wunderclient = wunderpy2.WunderClient(wunderlist_access_token, wunderlist_client_id)
+        self.wunderclient = wunderpy2.WunderApi().get_client(wunderlist_access_token, wunderlist_client_id)
 
-    def _handle_create_task(body):
+    def _handle_create_task(self, body):
         ''' Helper method to do the gruntwork for creating a task '''
         # TODO Print thing
         list_id = body.get(wj_model.CreateTaskKeys.LIST_ID)
@@ -37,7 +38,7 @@ class WunderlistQueueConsumer:
 
         new_task = self.wunderclient.create_task(list_id, title, starred=starred, due_date=due_date)
         # TODO If the connection is cut right here, we'll end up with duplicate tasks. It's a slim possibility, but there should be a better way of handling adding notes.
-        if task_note:
+        if note:
             new_task_id = new_task[wunderpy2.model.Task.id]
             self.wunderclient.create_note(new_task_id, note)
 
@@ -57,7 +58,9 @@ class WunderlistQueueConsumer:
             try:
                 if message_type == wj_model.MessageTypes.CREATE_TASK:
                     self._handle_create_task(message_body)
-                message_handled = True
+                    message_handled = True
+                else:
+                    print "Error: Unknown message type: {}".format(message_type)
             except (wunderpy2.exceptions.ConnectionError, wunderpy2.exceptions.TimeoutError) as e:
                 self.connection.sleep(10)
         channel.basic_ack(delivery_tag = method.delivery_tag)

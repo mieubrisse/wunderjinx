@@ -1,3 +1,7 @@
+# TODO These should probably be in a config file somewhere
+DATE_FORMAT = "%Y-%m-%d"
+TIMESTAMP_FORMAT = "%Y-%m-%d %H:%M:%S"
+
 class MessageTypes:
     CREATE_TASK = "create_task"
     # TODO Update, delete, etc.
