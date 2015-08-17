@@ -14,3 +14,6 @@ ACCESS_TOKEN = _config_obj["access_token"]
 QUEUE = _config_obj["queue"]
 RABBITMQ_HOST = _config_obj["rabbitmq_host"]
 DATETIME_FORMAT = _config_obj["datetime_format"]
+
+# TODO Temporary until list_resolver is ipmlemented
+DEFAULT_LIST_ID = _config_obj["default_list_id"]

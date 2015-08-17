@@ -11,7 +11,6 @@ import json
 import time
 import argparse
 import os.path
-from dateutil import parser as date_parser
 
 import config as wj_config
 import model as wj_model

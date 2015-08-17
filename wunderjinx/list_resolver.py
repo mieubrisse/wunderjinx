@@ -1,3 +1,5 @@
+import config as wj_config 
+
 class WunderlistListResolver:
     ''' Resolves user-entered (read: imperfect) list names to list IDs '''
     def __init__(self, wunderlist_access_token, wunderlist_client_id):
@@ -7,4 +9,4 @@ class WunderlistListResolver:
     def resolve(self, list_name):
         # TODO We'll want to hit the local mapping of list name -> list ID, once it's set up
         # TODO For now, we just return my inbox
-        return 103574383
+        return wj_config.DEFAULT_LIST_ID
