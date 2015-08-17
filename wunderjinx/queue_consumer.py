@@ -37,10 +37,16 @@ class WunderlistQueueConsumer:
         note = body.get(wj_model.CreateTaskKeys.NOTE)
 
         new_task = self.wunderclient.create_task(list_id, title, starred=starred, due_date=due_date)
+        # print "Created task: {}".format(str(new_task))
         # TODO If the connection is cut right here, we'll end up with duplicate tasks. It's a slim possibility, but there should be a better way of handling adding notes.
         if note:
-            new_task_id = new_task[wunderpy2.model.Task.id]
-            self.wunderclient.create_note(new_task_id, note)
+            new_task_id = new_task[wunderpy2.model.Task.ID]
+            # TODO Put in debugger logger level
+            # print "Creating new note '{}' on task with ID: {}".format(note, new_task_id)
+            new_note = self.wunderclient.create_note(new_task_id, note)
+
+            # TODO Put in debug logs
+            # print "Created note: {}".format(str(new_note))
 
     def _handle_message(self, channel, method, properties, body):
         ''' This function gets run on every Wunderlist task to be uploaded '''
@@ -62,6 +68,9 @@ class WunderlistQueueConsumer:
                 else:
                     print "Error: Unknown message type: {}".format(message_type)
             except (wunderpy2.exceptions.ConnectionError, wunderpy2.exceptions.TimeoutError) as e:
+                # TODO Put this in debug logger
+                # print "Error: Unable to submit message to Wunderlist; trying again in 10 seconds: {}".format(str(e))
+                # TODO Make this not a magic number
                 self.connection.sleep(10)
         channel.basic_ack(delivery_tag = method.delivery_tag)
 
@@ -106,9 +115,7 @@ if __name__ == "__main__":
     queue = wj_config.QUEUE
     rabbitmq_host = wj_config.RABBITMQ_HOST
     consumer = WunderlistQueueConsumer(rabbitmq_host, access_token, client_id, queue)
-    while True:
-        try:
-            consumer.consume()
-        except (pika.exceptions.AMQPConnectionError, pika.exceptions.ConnectionClosed):
-            print "Could not connect to RabbitMQ server at '{}'; trying again in 10 seconds".format(rabbitmq_host)
-            time.sleep(10)
+    try:
+        consumer.consume()
+    except (pika.exceptions.AMQPConnectionError, pika.exceptions.ConnectionClosed):
+        sys.stderr.write("Error: Unable to open connection to RabbitMQ server at '{}'\n".format(rabbitmq_host))
