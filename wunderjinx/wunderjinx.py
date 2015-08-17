@@ -5,9 +5,12 @@ import argparse
 import datetime
 import os
 import sys
+from parsedatetime import Calendar
 
 import list_resolver as wj_resolver
 import queue_producer
+
+# TODO We could speed things up if we had a server running that would feed the config so this doesn't have to read it every time, perhaps?
 import config as wj_config
 
 CONFIG_FILEPATH_ARGVAR = 'config_filepath'
@@ -17,6 +20,9 @@ ADD_TASK_DUE_DATE_ARGVAR = 'add_task_due_date'
 ADD_TASK_TITLE_ARGVAR = 'add_task_title'
 ADD_TASK_NOTE_ARGVAR = 'add_task_note'
 ADD_TASK_LIST_ARGVAR = 'add_task_list'
+
+# TODO Should this go in a config file? Or maybe it should be pulled from wunderpy2, since that's the final destination
+DATE_FORMAT = '%Y-%m-%d'
 
 today = datetime.datetime.now().date()
 tomorrow = today + datetime.timedelta(days=1)
@@ -60,6 +66,23 @@ def _validate_args(args):
         print 'Error: Destination list cannot be empty'
         return 1
 
+def _parse_date(date_str):
+    ''' 
+    Uses parsedatetime to do smart parsing for due dates 
+
+    
+    Returns:
+    String formatted    
+    '''
+    result = Calendar().parse(date_str)
+    # See https://bear.im/code/parsedatetime/docs/index.html
+    parse_outcome = result[1]
+    if parse_outcome == 0 or parse_outcome == 2:
+        # The parse failed to get a date
+        return None
+    parse_datetime = result[0]
+    return datetime.date(parse_datetime.tm_year, parse_datetime.tm_mon, parse_datetime.tm_mday).strftime(DATE_FORMAT)
+
 def main(argv=sys.argv):
     ''' 
     Main driver for script, and entry point for pip package
@@ -86,6 +109,11 @@ def main(argv=sys.argv):
     note = ' '.join(args[ADD_TASK_NOTE_ARGVAR]) if note_fragments else None
     starred = args[ADD_TASK_STARRED_ARGVAR]
     due_date = args[ADD_TASK_DUE_DATE_ARGVAR]
+    if due_date:
+        parsed_due_date = _parse_date(due_date)
+        if not parsed_due_date:
+            sys.stderr.write("Error: Unable to extract date from due date: {}\n".format(due_date))
+        due_date = parsed_due_date
     list_name = args[ADD_TASK_LIST_ARGVAR]
 
     list_resolver = wj_resolver.WunderlistListResolver(access_token, client_id)
