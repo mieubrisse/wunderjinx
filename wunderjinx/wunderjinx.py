@@ -76,12 +76,21 @@ def _parse_date(date_str):
     '''
     result = Calendar().parse(date_str)
     # See https://bear.im/code/parsedatetime/docs/index.html
-    parse_outcome = result[1]
-    if parse_outcome == 0 or parse_outcome == 2:
+    parse_type = result[1]
+    if parse_type == 0 or parse_type == 2:
         # The parse failed to get a date
         return None
-    parse_datetime = result[0]
-    return datetime.date(parse_datetime.tm_year, parse_datetime.tm_mon, parse_datetime.tm_mday).strftime(DATE_FORMAT)
+    parsed_date = result[0]
+    try:
+        year = parsed_date.tm_year
+        month = parsed_date.tm_mon
+        day = parsed_date.tm_mday
+    # Unsure why some inputs (e.g. "next year", "oct 28") get parsed as time.tm_struct and some get parsed as tuples
+    except AttributeError:
+        year = parsed_date[0]
+        month = parsed_date[1]
+        day = parsed_date[2]
+    return datetime.date(year, month, day).strftime(DATE_FORMAT)
 
 def main(argv=sys.argv):
     ''' 
