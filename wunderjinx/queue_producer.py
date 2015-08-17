@@ -6,6 +6,7 @@ import argparse
 import pika
 import wunderpy2
 import json
+import sys
 
 import datetime
 
@@ -33,7 +34,11 @@ class WunderlistQueueProducer:
 
         # TODO I probably want to pull out the probably-heavyweight connection-opening stuff into a separate method and have the user call a 'close()'
         #  method, but for now we'll leave it
-        connection = pika.BlockingConnection(pika.ConnectionParameters(self.rabbitmq_host))
+        try:
+            connection = pika.BlockingConnection(pika.ConnectionParameters(self.rabbitmq_host))
+        except pika.exceptions.AMQPConnectionError:
+            print "Error: Couldn't connect to RabbitMQ server at '{}'".format(self.rabbitmq_host)
+            sys.exit(1)
         channel = connection.channel()
         channel.queue_declare(queue=self.queue, durable=True)
         channel.confirm_delivery()
@@ -48,12 +53,17 @@ class WunderlistQueueProducer:
                     wj_model.CreateTaskKeys.NOTE : note,
                     }
                 }
-        publish_confirmed = channel.basic_publish(exchange='', 
-                routing_key=self.queue, 
-                body=json.dumps(message), 
-                properties=pika.BasicProperties(
-                    delivery_mode = 2 # Persistent messages
-                ))
-        if not publish_confirmed:
-            print 'Error: Publish could not be confirmed'
-        connection.close()
+        try:
+            publish_confirmed = channel.basic_publish(exchange='', 
+                    routing_key=self.queue, 
+                    body=json.dumps(message), 
+                    properties=pika.BasicProperties(
+                        delivery_mode = 2 # Persistent messages
+                    ))
+            if not publish_confirmed:
+                print 'Error: Publish could not be confirmed'
+        except pika.exceptions.AMQPConnectionError:
+            print "Error: Couldn't connect to RabbitMQ server at '{}'".format(self.rabbitmq_host)
+            sys.exit(1)
+        finally:
+            connection.close()

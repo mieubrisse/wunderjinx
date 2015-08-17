@@ -101,11 +101,14 @@ def _validate_args(args):
 if __name__ == "__main__":
     args = _parse_args()
     _validate_args(args)
-    config_filepath = args[CONFIG_FILEPATH_ARGVAR]
-    config = wj_config.load_config(config_filepath)
-    access_token = config[wj_config.ConfigKeys.ACCESS_TOKEN]
-    client_id = config[wj_config.ConfigKeys.CLIENT_ID]
-    queue = config[wj_config.ConfigKeys.QUEUE]
-    rabbitmq_host = config[wj_config.ConfigKeys.RABBITMQ_HOST]
+    access_token = wj_config.ACCESS_TOKEN
+    client_id = wj_config.CLIENT_ID
+    queue = wj_config.QUEUE
+    rabbitmq_host = wj_config.RABBITMQ_HOST
     consumer = WunderlistQueueConsumer(rabbitmq_host, access_token, client_id, queue)
-    consumer.consume()
+    while True:
+        try:
+            consumer.consume()
+        except (pika.exceptions.AMQPConnectionError, pika.exceptions.ConnectionClosed):
+            print "Could not connect to RabbitMQ server at '{}'; trying again in 10 seconds".format(rabbitmq_host)
+            time.sleep(10)

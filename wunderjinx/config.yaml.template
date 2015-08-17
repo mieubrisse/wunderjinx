@@ -1,5 +1,8 @@
 ---
-client_id: 
-access_token: 
-rabbitmq_host:
-queue:
+client_id : 
+access_token : 
+rabbitmq_host: localhost
+
+# You shouldn't need to touch these
+datetime_format: "%Y-%m-%d %H:%M:%S"
+queue: wunderjinx
