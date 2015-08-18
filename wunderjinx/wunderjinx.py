@@ -24,11 +24,6 @@ ADD_TASK_LIST_ARGVAR = 'add_task_list'
 # TODO Should this go in a config file? Or maybe it should be pulled from wunderpy2, since that's the final destination
 DATE_FORMAT = '%Y-%m-%d'
 
-today = datetime.datetime.now().date()
-tomorrow = today + datetime.timedelta(days=1)
-today_str = today.strftime('%Y-%m-%d')
-tomorrow_str = tomorrow.strftime('%Y-%m-%d')
-
 script_dir = os.path.dirname(os.path.realpath(__file__))
 default_config_filepath = os.path.join(script_dir, "config.yaml")
 
@@ -41,8 +36,8 @@ def _parse_args():
 
     parser.add_argument('-s', '--starred', action='store_true', dest=ADD_TASK_STARRED_ARGVAR, default=None, help="whether the task is starred or not")
     parser.add_argument('-d', '--due-date', metavar='<due date>', dest=ADD_TASK_DUE_DATE_ARGVAR, help="set task's due date")
-    parser.add_argument('-t', '--today', action='store_const', const=today_str, dest=ADD_TASK_DUE_DATE_ARGVAR, help="set the task's due date to today")
-    parser.add_argument('-m', '--tomorrow', action='store_const', const=tomorrow_str, dest=ADD_TASK_DUE_DATE_ARGVAR, help="set the task's due date to today")
+    parser.add_argument('-t', '--today', action='store_const', const="today", dest=ADD_TASK_DUE_DATE_ARGVAR, help="set the task's due date to today")
+    parser.add_argument('-m', '--tomorrow', action='store_const', const="tomorrow", dest=ADD_TASK_DUE_DATE_ARGVAR, help="set the task's due date to today")
     parser.add_argument('-l', '--list', dest=ADD_TASK_LIST_ARGVAR, metavar='<list>', default=['inbox'], nargs='+', help='task note')
     parser.add_argument('-n', '--note', nargs='+', dest=ADD_TASK_NOTE_ARGVAR, metavar='note', help='task note')
     parser.add_argument(ADD_TASK_TITLE_ARGVAR, nargs='+', metavar='title', help='task title')
@@ -122,6 +117,7 @@ def main(argv=sys.argv):
         parsed_due_date = _parse_date(due_date)
         if not parsed_due_date:
             sys.stderr.write("Error: Unable to extract date from due date: {}\n".format(due_date))
+            sys.exit(1)
         due_date = parsed_due_date
     list_name = args[ADD_TASK_LIST_ARGVAR]
 
