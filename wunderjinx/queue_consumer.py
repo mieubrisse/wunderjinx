@@ -66,7 +66,9 @@ class WunderlistQueueConsumer:
                     message_handled = True
                 else:
                     print "Error: Unknown message type: {}".format(message_type)
-            except (wunderpy2.exceptions.ConnectionError, wunderpy2.exceptions.TimeoutError) as e:
+            # TODO Remains to be seen how effective catching every exception is. We probably ought to actually catch ValueError as well, maybe?
+            # except (wunderpy2.exceptions.ConnectionError, wunderpy2.exceptions.TimeoutError) as e:
+            except Exception:
                 # TODO Put this in debug logger
                 # print "Error: Unable to submit message to Wunderlist; trying again in 10 seconds: {}".format(str(e))
                 # TODO Make this not a magic number
