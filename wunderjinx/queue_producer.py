@@ -29,8 +29,13 @@ class WunderlistQueueProducer:
         Params:
         title -- title of new Wunderlist task
         '''
-        if len(title.strip()) == 0:
+        title = title.strip()
+        if len(title) == 0:
             raise ValueError('Task title cannot be empty')
+        # TODO The API being used by both the queue_producer and queue_consumer ought to be the same for validation purposes
+        api = wunderpy2.WunderApi()
+        if len(title) > api.MAX_TASK_TITLE_LENGTH:
+            raise ValueError('Task title cannot be longer than ' + str(api.MAX_TASK_TITLE_LENGTH) + ' characters')
 
         # TODO I probably want to pull out the probably-heavyweight connection-opening stuff into a separate method and have the user call a 'close()'
         #  method, but for now we'll leave it
