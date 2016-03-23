@@ -7,19 +7,23 @@
     <key>EnvironmentVariables</key>
     <dict>
             <key>PYTHONPATH</key>
-            <string>/usr/local/lib/python2.7/site-packages</string>
+            <!-- <string>/usr/local/lib/python2.7/site-packages</string> -->
+            <string>{{ pythonpath }}</string>
     </dict>
     <key>ProgramArguments</key>
     <array>
-        <string>/usr/local/bin/python</string>
-        <string>REPLACEME /path/to/wunderjinx/queue_consumer.py</string>
+        <string>{{ python_binary_filepath }}</string>
+        <!-- <string>REPLACEME /path/to/wunderjinx/queue_consumer.py</string> -->
+        <string>{{ queue_consumer_filepath }}</string>
     </array>
     <key>KeepAlive</key>
     <true/>
     <key>StandardOutPath</key>
-    <string>REPLACEME /path/to/wunderjinx.log</string>
+    <!-- <string>REPLACEME /path/to/wunderjinx.log</string> -->
+    <string>{{ log_filepath }}</string>
     <key>StandardErrorPath</key>
-    <string>REPLACEME /path/to/wunderjinx.log</string>
+    <!-- <string>REPLACEME /path/to/wunderjinx.log</string> -->
+    <string>{{ log_filepath }}</string>
     <key>Debug</key>
     <true/>
 </dict>
