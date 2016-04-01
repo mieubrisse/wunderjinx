@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.stangegrotto.wunderjinx</string>
+    <key>EnvironmentVariables</key>
+    <dict>
+            <key>PYTHONPATH</key>
+            <!-- <string>/usr/local/lib/python2.7/site-packages</string> -->
+            <string>CHANGEME /path/to/python/site-packages/dir</string>
+    </dict>
+    <key>ProgramArguments</key>
+    <array>
+        <string>CHANGEME /path/to/python/binary</string>
+        <!-- <string>REPLACEME /path/to/wunderjinx/queue_consumer.py</string> -->
+        <string>CHANGEME /path/to/queue_consumer.py</string>
+    </array>
+    <key>KeepAlive</key>
+    <true/>
+    <key>StandardOutPath</key>
+    <!-- <string>REPLACEME /path/to/wunderjinx.log</string> -->
+    <string>CHANGEME /path/to/wunderjinx-stdout.log</string>
+    <key>StandardErrorPath</key>
+    <!-- <string>REPLACEME /path/to/wunderjinx.log</string> -->
+    <string>CHANGEME /path/to/wunderjinx-stderr.log</string>
+    <key>Debug</key>
+    <true/>
+</dict>
+</plist>
