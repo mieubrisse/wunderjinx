@@ -1,3 +1,4 @@
 *.yaml
 *.yml
+config.py
 queue_consumer.plist
