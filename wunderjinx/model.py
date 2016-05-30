@@ -14,7 +14,7 @@ class MessageKeys:
 class CreateTaskKeys:
     ''' Defines the keys in the "body" object '''
     TITLE = "title"
-    LIST_ID = "list_id"     # int
+    LIST_NAME = "list_name" # User-entered text
     DUE_DATE = "due_date"
     STARRED = "starred"
     NOTE = "note"

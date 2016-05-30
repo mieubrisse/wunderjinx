@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
     <key>Label</key>
-    <string>com.stangegrotto.wunderjinx.queue_consumer</string>
+    <string>com.stangegrotto.wunderjinx.list_resolver</string>
     <key>EnvironmentVariables</key>
     <dict>
             <key>PYTHONPATH</key>
@@ -12,14 +12,14 @@
     <key>ProgramArguments</key>
     <array>
         <string>CHANGEME /path/to/python/binary</string>
-        <string>CHANGEME /path/to/queue_consumer.py</string>
+        <string>CHANGEME /path/to/list_resolver.py</string>
     </array>
     <key>KeepAlive</key>
     <true/>
     <key>StandardOutPath</key>
-    <string>CHANGEME /path/to/queue-consumer-stdout.log</string>
+    <string>CHANGEME /path/to/list-resolver-stdout.log</string>
     <key>StandardErrorPath</key>
-    <string>CHANGEME /path/to/queue-consumer-stderr.log</string>
+    <string>CHANGEME /path/to/list-resolver-stderr.log</string>
     <key>Debug</key>
     <true/>
 </dict>

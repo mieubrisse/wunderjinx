@@ -22,7 +22,7 @@ class WunderlistQueueProducer:
         self.rabbitmq_host = rabbitmq_host
         self.queue = queue
 
-    def create_task(self, title, list_id, due_date=None, starred=None, note=None):
+    def create_task(self, title, list_name=None, due_date=None, starred=None, note=None):
         ''' 
         Add a new Wunderlist action to the queue 
 
@@ -54,7 +54,7 @@ class WunderlistQueueProducer:
                     wj_model.CreateTaskKeys.TITLE : title,
                     wj_model.CreateTaskKeys.DUE_DATE : due_date,
                     wj_model.CreateTaskKeys.STARRED : starred,
-                    wj_model.CreateTaskKeys.LIST_ID : int(list_id),
+                    wj_model.CreateTaskKeys.LIST_NAME : list_name,
                     wj_model.CreateTaskKeys.NOTE : note,
                     }
                 }
