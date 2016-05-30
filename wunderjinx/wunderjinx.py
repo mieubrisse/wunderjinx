@@ -81,7 +81,7 @@ def _parse_date(date_str):
         year = parsed_date[0]
         month = parsed_date[1]
         day = parsed_date[2]
-    return datetime.date(year, month, day).strftime(DATE_FORMAT)
+    return datetime.date(year, month, day)
 
 def main(input_args):
     ''' 
@@ -109,21 +109,26 @@ def main(input_args):
     note = ' '.join(note_fragments) if note_fragments else None
     starred = args[ADD_TASK_STARRED_ARGVAR]
     due_date_fragments = args[ADD_TASK_DUE_DATE_ARGVAR]
-    due_date = ' '.join(due_date_fragments) if due_date_fragments else None
-    if due_date:
-        parsed_due_date = _parse_date(due_date)
+    print "Due date fragments: " + str(due_date_fragments)
+    input_due_date = ' '.join(due_date_fragments) if due_date_fragments else None
+    due_date_iso_str = None
+    if input_due_date:
+        parsed_due_date = _parse_date(input_due_date)
         if not parsed_due_date:
             sys.stderr.write("Error: Unable to extract date from due date: {}\n".format(due_date))
             sys.exit(1)
-        due_date = parsed_due_date
 
-        # Just because I want it, automatically star tasks that are due today
-        if due_date == datetime.date.today():
+        # Automatically starring tasks due today, because I want it
+        # TODO Automatically star any tasks due this week (how do we define week, though?)
+        if parsed_due_date == datetime.date.today():
             starred = True
+
+        due_date_iso_str = parsed_due_date.strftime(DATE_FORMAT)
+
     list_name_fragments = args[ADD_TASK_LIST_ARGVAR]
     list_name = ' '.join(list_name_fragments) if list_name_fragments else None
 
-    producer.create_task(title, list_name=list_name, due_date=due_date, starred=starred, note=note)
+    producer.create_task(title, list_name=list_name, due_date=due_date_iso_str, starred=starred, note=note)
 
     return 0
 

@@ -94,8 +94,7 @@ class WunderlistQueueConsumer:
         #  at task production time)
         list_id = get_task_list_id(list_name)
         if list_id is None:
-            print "Error: Could not resolve list with name '" + list_name + "' for task:"
-            print json.dumps(body)
+            raise ValueError("Could not resolve list with name '" + list_name + "' for task:" + json.dumps(body))
 
         new_task = self.wunderclient.create_task(list_id, title, starred=starred, due_date=due_date)
         # print "Created task: {}".format(str(new_task))

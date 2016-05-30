@@ -62,7 +62,7 @@ class ResolverService():
         ID of the matching Wunderlist list, or None if no list matched
         """
         if force_refresh or self._is_cache_stale():
-            _refresh_lists()
+            self._refresh_lists()
         matching_list_names = difflib.get_close_matches(name.strip(), self.lists.keys(), n=1)
         target_list_name = matching_list_names[0] if len(matching_list_names) > 0 else None
         if target_list_name is None:
