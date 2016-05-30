@@ -116,6 +116,10 @@ def main(input_args):
             sys.stderr.write("Error: Unable to extract date from due date: {}\n".format(due_date))
             sys.exit(1)
         due_date = parsed_due_date
+
+        # Just because I want it, automatically star tasks that are due today
+        if due_date == datetime.date.today():
+            starred = True
     list_name_fragments = args[ADD_TASK_LIST_ARGVAR]
     list_name = ' '.join(list_name_fragments) if list_name_fragments else None
 
