@@ -37,13 +37,19 @@ class ResolverService():
 
     def __init__(self):
         self.wunderclient = wunderpy2.WunderApi().get_client(config.ACCESS_TOKEN, config.CLIENT_ID)
-        self.last_refresh_timestamp = datetime.datetime.now()
+        self.last_refresh_timestamp = datetime.datetime.now() - datetime.timedelta(minutes=RESOLVER_CACHE_EXPIRATION_MIN)
         self._refresh_lists()
 
     def _refresh_lists(self):
-        wunderlist_lists = self.wunderclient.get_lists()
-        self.lists = { wl_list[wunderpy2.List.TITLE]: wl_list for wl_list in wunderlist_lists }
-        self.last_refresh_timestamp = datetime.datetime.now()
+        """
+        Make a best-effort attempt to refresh the cache
+        """
+        try:
+            wunderlist_lists = self.wunderclient.get_lists()
+            self.lists = { wl_list[wunderpy2.List.TITLE]: wl_list for wl_list in wunderlist_lists }
+            self.last_refresh_timestamp = datetime.datetime.now()
+        except (wunderpy2.exceptions.ConnectionError, wunderpy2.exceptions.TimeoutError) as e:
+            print "Warning: Couldn't refresh cache of Wunderlist lists: " + str(e)
 
     def _is_cache_stale(self):
         return datetime.datetime.now() - self.last_refresh_timestamp > datetime.timedelta(minutes=RESOLVER_CACHE_EXPIRATION_MIN)
