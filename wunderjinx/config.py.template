@@ -1,0 +1,19 @@
+# ----- Wunderlist connection details ---------------
+CLIENT_ID =
+ACCESS_TOKEN =
+# ---------------------------------------------------
+
+# ------ RabbitMQ connection details ----------------
+RABBITMQ_HOST =
+QUEUE =
+# ---------------------------------------------------
+
+# ------ List resolver settings ---------------------
+RESOLVER_HOST = 
+RESOLVER_PORT = 
+DEFAULT_LIST_NAME = "Inbox"
+# ---------------------------------------------------
+
+# ------ Advanced settings --------------------------
+DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
+# ---------------------------------------------------

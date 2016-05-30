@@ -7,8 +7,7 @@ import os
 import sys
 from parsedatetime import Calendar
 
-import list_resolver as wj_resolver
-import queue_producer
+import queue_producer as wj_queue_producer
 
 # TODO We could speed things up if we had a server running that would feed the config so this doesn't have to read it every time, perhaps?
 import config as wj_config
@@ -23,9 +22,6 @@ ADD_TASK_LIST_ARGVAR = 'add_task_list'
 
 # TODO Should this go in a config file? Or maybe it should be pulled from wunderpy2, since that's the final destination
 DATE_FORMAT = '%Y-%m-%d'
-
-script_dir = os.path.dirname(os.path.realpath(__file__))
-default_config_filepath = os.path.join(script_dir, "config.yaml")
 
 def _parse_args(args):
     ''' Parses command line arguments with argparse '''
@@ -94,7 +90,7 @@ def main(argv=sys.argv):
     Return:
     Zero if all was successful, non-zero integer otherwise
     '''
-    args = _parse_args(argv)
+    args = _parse_args(argv[1:])
     error_code = _validate_args(args)
     if error_code:
         return error_code
@@ -106,7 +102,7 @@ def main(argv=sys.argv):
     access_token = wj_config.ACCESS_TOKEN
     client_id = wj_config.CLIENT_ID
 
-    producer = queue_producer.WunderlistQueueProducer(rabbitmq_host, queue)
+    producer = wj_queue_producer.WunderlistQueueProducer(rabbitmq_host, queue)
 
     title = ' '.join(args[ADD_TASK_TITLE_ARGVAR])
     note_fragments = args[ADD_TASK_NOTE_ARGVAR]
@@ -120,12 +116,10 @@ def main(argv=sys.argv):
             sys.stderr.write("Error: Unable to extract date from due date: {}\n".format(due_date))
             sys.exit(1)
         due_date = parsed_due_date
-    list_name = args[ADD_TASK_LIST_ARGVAR]
+    list_name_fragments = args[ADD_TASK_LIST_ARGVAR]
+    list_name = ' '.join(list_name_fragments) if list_name_fragments else None
 
-    list_resolver = wj_resolver.WunderlistListResolver(access_token, client_id)
-    list_id = list_resolver.resolve(list_name)
-
-    producer.create_task(title, list_id, due_date=due_date, starred=starred, note=note)
+    producer.create_task(title, list_name=list_name, due_date=due_date, starred=starred, note=note)
 
     return 0
 

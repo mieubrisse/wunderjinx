@@ -31,7 +31,12 @@ setup(
     ],
     keywords='wunderlist api cli',
     packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
-    install_requires=['wunderpy2', 'pyyaml', 'python-dateutil', 'pika'],
+    install_requires=[
+        'wunderpy2', 
+        'parsedatetime', 
+        'pika',
+        'requests',
+        ],
     entry_points={
         'console_scripts': [
             'wunderjinx = wunderjinx.wunderjinx:main',
