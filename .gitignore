@@ -1,4 +1,3 @@
-*.yaml
-*.yml
 config.py
 queue_consumer.plist
+list_resolver.plist
