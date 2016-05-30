@@ -1,3 +1,7 @@
+"""
+This is the Python script that we call from Aflred, which will in turn call the necessary Python modules to add the task to Wunderlist
+"""
+
 import sys
 import wunderjinx
 
@@ -5,7 +9,5 @@ import wunderjinx
 if len(sys.argv) != 2:
     sys.stderr.write("Error: No arguments passed\n")
     sys.exit(1)
-# We don't have to use a filer(None, ) here because split() without a separator automatically removes empty strings
 args = sys.argv[1].split()
-wunderjinx.main(argv=args)
-
+wunderjinx.main(args)

@@ -83,14 +83,14 @@ def _parse_date(date_str):
         day = parsed_date[2]
     return datetime.date(year, month, day).strftime(DATE_FORMAT)
 
-def main(argv=sys.argv):
+def main(input_args):
     ''' 
     Main driver for script, and entry point for pip package
 
     Return:
     Zero if all was successful, non-zero integer otherwise
     '''
-    args = _parse_args(argv[1:])
+    args = _parse_args(input_args)
     error_code = _validate_args(args)
     if error_code:
         return error_code
@@ -124,4 +124,4 @@ def main(argv=sys.argv):
     return 0
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(main(sys.argv[1:]))
