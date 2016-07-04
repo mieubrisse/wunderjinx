@@ -12,6 +12,7 @@
     <key>ProgramArguments</key>
     <array>
         <string>CHANGEME /path/to/python/binary</string>
+        <string>-u</string>
         <string>CHANGEME /path/to/queue_consumer.py</string>
     </array>
     <key>KeepAlive</key>

@@ -34,7 +34,7 @@ def _parse_args(args):
     parser.add_argument('-d', '--due-date', metavar='<due date>', dest=ADD_TASK_DUE_DATE_ARGVAR, nargs='+', help="set task's due date")
     parser.add_argument('-t', '--today', action='store_const', const=["today"], dest=ADD_TASK_DUE_DATE_ARGVAR, help="set the task's due date to today")
     parser.add_argument('-m', '--tomorrow', action='store_const', const=["tomorrow"], dest=ADD_TASK_DUE_DATE_ARGVAR, help="set the task's due date to today")
-    parser.add_argument('-l', '--list', dest=ADD_TASK_LIST_ARGVAR, metavar='<list>', default=['inbox'], nargs='+', help='task note')
+    parser.add_argument('-l', '--list', dest=ADD_TASK_LIST_ARGVAR, metavar='<list>', nargs='+', help='task note')
     parser.add_argument('-n', '--note', nargs='+', dest=ADD_TASK_NOTE_ARGVAR, metavar='note', help='task note')
     parser.add_argument(ADD_TASK_TITLE_ARGVAR, nargs='+', metavar='title', help='task title')
     return vars(parser.parse_args(args))
@@ -47,14 +47,9 @@ def _validate_args(args):
     Exit code if one ought to be sent, or None if everything is fine
     '''
     title = ' '.join(args[ADD_TASK_TITLE_ARGVAR])
-    dest_list = ' '.join(args[ADD_TASK_LIST_ARGVAR])
     if len(title.strip()) == 0:
         # TODO This should really be a logger
         print 'Error: Title cannot be empty'
-        return 1
-    if len(dest_list.strip()) == 0:
-        # TODO This should really be a logger
-        print 'Error: Destination list cannot be empty'
         return 1
 
 def _parse_date(date_str):
@@ -109,7 +104,6 @@ def main(input_args):
     note = ' '.join(note_fragments) if note_fragments else None
     starred = args[ADD_TASK_STARRED_ARGVAR]
     due_date_fragments = args[ADD_TASK_DUE_DATE_ARGVAR]
-    print "Due date fragments: " + str(due_date_fragments)
     input_due_date = ' '.join(due_date_fragments) if due_date_fragments else None
     due_date_iso_str = None
     if input_due_date:
@@ -125,6 +119,7 @@ def main(input_args):
 
         due_date_iso_str = parsed_due_date.strftime(DATE_FORMAT)
 
+    # TODO Perform trial list name resolution so we can flag an error to the user
     list_name_fragments = args[ADD_TASK_LIST_ARGVAR]
     list_name = ' '.join(list_name_fragments) if list_name_fragments else None
 

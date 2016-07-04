@@ -11,63 +11,12 @@ import json
 import time
 import argparse
 import os.path
-import requests
 
 import config as wj_config
 import model as wj_model
 import list_resolver as wj_list_resolver
 
 _FALLBACK_LIST_NAME = "Inbox" # Name of list to use if none of the user-defined lists works
-
-HTTP_SUCCESS_STATUS_CODE = 200
-
-class ListResolverConnectionError(Exception):
-    pass
-
-def _resolve_list_name(list_name):
-    """
-    Queries the list resolving service to get the ID for the given list
-
-    Return:
-    ID of list, or None if no ID was found
-    """
-    url = "http://{hostname}:{port}{endpoint}?{name_param}={list_name}".format(
-            hostname=wj_config.RESOLVER_HOST, 
-            port=wj_config.RESOLVER_PORT, 
-            endpoint=wj_list_resolver.LIST_LOOKUP_ENDPOINT, 
-            name_param=wj_list_resolver.LIST_LOOKUP_NAME_URL_PARAM, 
-            list_name=list_name)
-
-    try:
-        response = requests.get(url, timeout=3)
-    except requests.exceptions.RequestException as e:
-        raise ListResolverConnectionError()
-
-    if response.status_code != HTTP_SUCCESS_STATUS_CODE:
-        return None
-    return int(response.text)
-
-def get_task_list_id(suggested_list_name):
-    """
-    Resolves the given list name to an ID, or returns the user-defined default list if that doesn't work, or returns
-    Inbox ID if all that fails
-
-    Return:
-    The first match of: the ID for the given list, the ID for the user-defined default list, the ID for the fallback list, None
-    """
-    if suggested_list_name is not None and len(suggested_list_name.strip()) > 0:
-        user_list_id = _resolve_list_name(suggested_list_name)
-        if user_list_id is not None:
-            return user_list_id
-        print("Warning: Could not resolve list name '" + suggested_list_name + "' to an ID")
-    if wj_config.DEFAULT_LIST_NAME is not None and len(wj_config.DEFAULT_LIST_NAME.strip()) > 0:
-        default_list_id = _resolve_list_name(wj_config.DEFAULT_LIST_NAME)
-        if default_list_id is not None:
-            return default_list_id
-    fallback_list_id = _resolve_list_name(_FALLBACK_LIST_NAME)
-    if fallback_list_id is not None:
-        return fallback_list_id
-    return None
 
 class WunderlistQueueConsumer:
     ''' 
@@ -79,6 +28,31 @@ class WunderlistQueueConsumer:
         self.queue = queue
         self.rabbitmq_host = rabbitmq_host
         self.wunderclient = wunderpy2.WunderApi().get_client(wunderlist_access_token, wunderlist_client_id)
+
+        # TODO There's maaaaybe an issue with the fact that this isn't wrapped in mutexes... maybe
+        self.list_resolver = wj_list_resolver.ResolverService()
+
+    def _get_task_list_id(self, suggested_list_name):
+        """
+        Resolves the given list name to an ID, or returns the user-defined default list if that doesn't work, or returns
+        Inbox ID if all that fails
+
+        Return:
+        The first match of: the ID for the given list, the ID for the user-defined default list, the ID for the fallback list, None
+        """
+        if suggested_list_name is not None and len(suggested_list_name.strip()) > 0:
+            user_list_id = self.list_resolver.get_list_by_name(suggested_list_name)
+            if user_list_id is not None:
+                return user_list_id
+            print("Warning: Could not resolve list name '" + suggested_list_name + "' to an ID")
+        if wj_config.DEFAULT_LIST_NAME is not None and len(wj_config.DEFAULT_LIST_NAME.strip()) > 0:
+            default_list_id = self.list_resolver.get_list_by_name(wj_config.DEFAULT_LIST_NAME)
+            if default_list_id is not None:
+                return default_list_id
+        fallback_list_id = self.list_resolver.get_list_by_name(_FALLBACK_LIST_NAME)
+        if fallback_list_id is not None:
+            return fallback_list_id
+        return None
 
     def _handle_create_task(self, body):
         ''' Helper method to do the gruntwork for creating a task '''
@@ -92,7 +66,7 @@ class WunderlistQueueConsumer:
         # TODO It may be that we'll need to do a list name resolve at both task production and task consumption
         #  time, in case the resolving doesn't work at consumption (and so we can show the user resolution errors
         #  at task production time)
-        list_id = get_task_list_id(list_name)
+        list_id = self._get_task_list_id(list_name)
         if list_id is None:
             raise ValueError("Could not resolve list with name '" + list_name + "' for task:" + json.dumps(body))
 
@@ -127,7 +101,7 @@ class WunderlistQueueConsumer:
                     message_handled = True
                 else:
                     print "Error: Unknown message type: {}".format(message_type)
-            except (ListResolverConnectionError, wunderpy2.exceptions.ConnectionError, wunderpy2.exceptions.TimeoutError) as e:
+            except (wunderpy2.exceptions.ConnectionError, wunderpy2.exceptions.TimeoutError) as e:
                 # TODO Put this in debug logger
                 # print "Error: Unable to submit message to Wunderlist; trying again in 10 seconds: {}".format(str(e))
                 # TODO Make this not a magic number
@@ -180,7 +154,7 @@ if __name__ == "__main__":
     rabbitmq_host = wj_config.RABBITMQ_HOST
     consumer = WunderlistQueueConsumer(rabbitmq_host, access_token, client_id, queue)
     try:
-        print "Queue consumer started (make sure your list-resolving service is up!)"
+        print "------------ Queue consumer started! ------------------------------------"
         consumer.consume()
     except (pika.exceptions.AMQPConnectionError, pika.exceptions.ConnectionClosed):
         sys.stderr.write("Error: Unable to open connection to RabbitMQ server at '{}'\n".format(rabbitmq_host))
