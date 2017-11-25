@@ -35,7 +35,6 @@ setup(
         'wunderpy2', 
         'parsedatetime', 
         'pika',
-        'requests',
         ],
     entry_points={
         'console_scripts': [

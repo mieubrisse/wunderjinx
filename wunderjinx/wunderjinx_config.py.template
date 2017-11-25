@@ -5,12 +5,11 @@ ACCESS_TOKEN =
 
 # ------ RabbitMQ connection details ----------------
 RABBITMQ_HOST =
-QUEUE =
+RABBITMQ_PORT = 5672
+QUEUE = "wunderjinx"
 # ---------------------------------------------------
 
 # ------ List resolver settings ---------------------
-RESOLVER_HOST = 
-RESOLVER_PORT = 
 DEFAULT_LIST_NAME = "Inbox"
 # ---------------------------------------------------
 

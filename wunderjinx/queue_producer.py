@@ -13,13 +13,15 @@ import datetime
 import model as wj_model
 
 class WunderlistQueueProducer:
-    def __init__(self, rabbitmq_host, queue):
+    def __init__(self, rabbitmq_host, rabbitmq_port, queue):
         '''
         Params:
         rabbitmq_host -- hostname of host running RabbitMQ message queue
+        rabbitmq_port -- port RabbitMQ is running on 
         queue -- name of queue to send messages to
         '''
         self.rabbitmq_host = rabbitmq_host
+        self.rabbitmq_port = rabbitmq_port
         self.queue = queue
 
     def create_task(self, title, list_name=None, due_date=None, starred=None, note=None):
@@ -40,7 +42,7 @@ class WunderlistQueueProducer:
         # TODO I probably want to pull out the probably-heavyweight connection-opening stuff into a separate method and have the user call a 'close()'
         #  method, but for now we'll leave it
         try:
-            connection = pika.BlockingConnection(pika.ConnectionParameters(self.rabbitmq_host))
+            connection = pika.BlockingConnection(pika.ConnectionParameters(self.rabbitmq_host, self.rabbitmq_port))
         except pika.exceptions.AMQPConnectionError:
             print "Error: Couldn't connect to RabbitMQ server at '{}'".format(self.rabbitmq_host)
             sys.exit(1)

@@ -9,18 +9,21 @@ NOTE: This is not even close to complete right now
 * Vim-like keybindings
 * Full offline functionality
 
-## Setup
-1. Install RabbitMQ with Homebrew
-2. Configure RabbitMQ to start on launch (e.g. use launchctl to load the .plist file in ~/Library/LaunchAgents)
-3. Copy config.yaml.template to create config.yaml **in the same directory as config.yaml.template** (config.py looks for a config.yaml in the same directory as itself... this should be changed one day to be better)
-4. Fill in the new config.yaml with your Wunderlist client ID and access token
-5. Copy queue_consumer.plist.template to create queue_consumer.plist
-6. Fill in the new queue_consumer.plist with the appropriate paths
-7. Configure that, too, to start on launch by symlinking to ~/Library/LaunchAgents and running `launchctl load <plist file>`
-8. Create a PyEnv virtualenv for Wunderjinx and install its dependencies:
+## Setup (with pyenv-virtualenv)
+1. Install pyenv: `brew install pyenv`
+1. Install pyenv-virtualenv: `brew install pyenv-virtualenv`
+1. Install the latest Python 2 version: `pyenv install $LATEST_PYTHON_2`
+1. Create a new virtualenv for running wunderjinx: `pyenv virtualenv $LATEST_PYTHON_2 wunderjinx`
+1. Activate the virtualenv: `pyenv activate wunderjinx`
+1. Install Wunderjinx's dependencies: `pip install wunderpy2 parsedatetime pika`
+1. Install RabbitMQ with Homebrew: `brew install rabbitmq`
+1. Configure RabbitMQ to start on launch using the directions from Homebrew (use launchctl to load the .plist file in ~/Library/LaunchAgents)
+1. Create a config directory somewhere on your filesystem to house Wunderjinx config
+1. Copy `wunderjinx_config.py.template` to your config directory, renaming it to `wunderjinx_config.py`
+1. Fill in all missing fields in your new `wunderjinx_config.py`
+1. Copy `queue_consumer.plist.template` to your config directory, renaming it to `queue_consumer.plist`
+1. Fill in all fields with "CHANGEME" in your new `queue_consumer.plist`
+1. Configure the queue_consumer to start on launch by symlinking the `queue_consumer.plist` file into `~/Library/LaunchAgents` and running `launchctl load <plist file>`
+1. Make the Bash code called in your Alfred workflow look like so, filling in the appropriate values:
 
-    pip install wunderpy2 parsedatetime pyyaml pika flask requests
-
-8. Modify the Alfred workflow script to point to the appropriate Python and point to the appropriate alfred_workflow.py file:
-
-    /path/to/your/python /path/to/your/alfred_workflow.py "{query}" 2>&1
+    PYENV_VERSION=wunderjinx PYTHONPATH=/your/config/directory:${PYTHONPATH} ~/.pyenv/shims/python /your/path/to/alfred_workflow.py "{query}" 2>&1

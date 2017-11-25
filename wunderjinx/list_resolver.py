@@ -9,8 +9,8 @@ import difflib
 import wunderpy2
 import datetime
 
-# Wunderjinx-specific imports
-import config
+# This should live in a different directory that's been added to the PYTHONPATH before this script runs
+import wunderjinx_config as wj_config
 
 # Number of minutes before the Wunderlist list cache will be forcibly refreshed
 DEFAULT_CACHE_EXPIRATION_MIN = 10
@@ -21,7 +21,7 @@ class ResolverService():
     """
 
     def __init__(self, cache_expiration_min=DEFAULT_CACHE_EXPIRATION_MIN):
-        self.wunderclient = wunderpy2.WunderApi().get_client(config.ACCESS_TOKEN, config.CLIENT_ID)
+        self.wunderclient = wunderpy2.WunderApi().get_client(wj_config.ACCESS_TOKEN, wj_config.CLIENT_ID)
         self.cache_expiration_min=cache_expiration_min
         self.last_refresh_timestamp = datetime.datetime.now() - datetime.timedelta(minutes=cache_expiration_min)
         self._refresh_lists()

@@ -1,27 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
-<dict>
-    <key>Label</key>
-    <string>com.stangegrotto.wunderjinx.queue_consumer</string>
-    <key>EnvironmentVariables</key>
     <dict>
+        <key>Label</key>
+        <string>com.stangegrotto.wunderjinx.queue_consumer</string>
+        <key>EnvironmentVariables</key>
+        <dict>
             <key>PYTHONPATH</key>
-            <string>CHANGEME /path/to/python/site-packages/dir</string>
+            <!-- This should be a colon-separated combo of the config directory you have your wunderjinx_config.py file in and the site-packages directory of the Python installation you want to run queue_consumer with -->
+            <string>CHANGEME /path/to/config/directory/containing/wunderjinx_config.py:/path/to/python/site-packages/dir</string>
+        </dict>
+        <key>ProgramArguments</key>
+        <array>
+            <!-- This should be the path to your 'python' binary you want to start queue_consumer with -->
+            <string>CHANGEME /path/to/python/binary</string>
+            <string>-u</string>
+            <!-- This should be the path to the queue_consumer.py file on your system -->
+            <string>CHANGEME /path/to/queue_consumer.py</string>
+        </array>
+        <key>KeepAlive</key>
+        <true/>
+        <key>StandardOutPath</key>
+        <!-- This is where queue-consumer STDOUT gets logged -->
+        <string>CHANGEME /path/to/queue-consumer-stdout.log</string>
+        <key>StandardErrorPath</key>
+        <!-- This is where queue consumer STDERR gets logged -->
+        <string>CHANGEME /path/to/queue-consumer-stderr.log</string>
+        <key>Debug</key>
+        <true/>
     </dict>
-    <key>ProgramArguments</key>
-    <array>
-        <string>CHANGEME /path/to/python/binary</string>
-        <string>-u</string>
-        <string>CHANGEME /path/to/queue_consumer.py</string>
-    </array>
-    <key>KeepAlive</key>
-    <true/>
-    <key>StandardOutPath</key>
-    <string>CHANGEME /path/to/queue-consumer-stdout.log</string>
-    <key>StandardErrorPath</key>
-    <string>CHANGEME /path/to/queue-consumer-stderr.log</string>
-    <key>Debug</key>
-    <true/>
-</dict>
 </plist>

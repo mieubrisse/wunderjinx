@@ -1,5 +1,5 @@
 '''
-Script to handle all actions the user might want to take with Wunderjinx
+User CLI to create tasks in the RabbitMQ queue for upload to Wunderlist
 '''
 import argparse
 import datetime
@@ -9,10 +9,8 @@ from parsedatetime import Calendar
 
 import queue_producer as wj_queue_producer
 
-# TODO We could speed things up if we had a server running that would feed the config so this doesn't have to read it every time, perhaps?
-import config as wj_config
-
-CONFIG_FILEPATH_ARGVAR = 'config_filepath'
+# This should live in a different directory that's been added to the PYTHONPATH before this script runs
+import wunderjinx_config as wj_config
 
 ADD_TASK_STARRED_ARGVAR = 'add_task_starred'
 ADD_TASK_DUE_DATE_ARGVAR = 'add_task_due_date'
@@ -26,10 +24,6 @@ DATE_FORMAT = '%Y-%m-%d'
 def _parse_args(args):
     ''' Parses command line arguments with argparse '''
     parser = argparse.ArgumentParser()
-
-    # TODO This is disabled for now until I get a better way to do config files that lets me set the filepaths
-    # parser.add_argument('--config', dest=CONFIG_FILEPATH_ARGVAR, default=default_config_filepath, metavar="<config file>", help="YAML config file to use")
-
     parser.add_argument('-s', '--starred', action='store_true', dest=ADD_TASK_STARRED_ARGVAR, default=None, help="whether the task is starred or not")
     parser.add_argument('-d', '--due-date', metavar='<due date>', dest=ADD_TASK_DUE_DATE_ARGVAR, nargs='+', help="set task's due date")
     parser.add_argument('-t', '--today', action='store_const', const=["today"], dest=ADD_TASK_DUE_DATE_ARGVAR, help="set the task's due date to today")
@@ -90,14 +84,13 @@ def main(input_args):
     if error_code:
         return error_code
 
-    # TODO Reimplement customizable config filepath
-    # config_filepath = args[CONFIG_FILEPATH_ARGVAR]
     rabbitmq_host = wj_config.RABBITMQ_HOST
+    rabbitmq_port = wj_config.RABBITMQ_PORT
     queue = wj_config.QUEUE
     access_token = wj_config.ACCESS_TOKEN
     client_id = wj_config.CLIENT_ID
 
-    producer = wj_queue_producer.WunderlistQueueProducer(rabbitmq_host, queue)
+    producer = wj_queue_producer.WunderlistQueueProducer(rabbitmq_host, rabbitmq_port, queue)
 
     title = ' '.join(args[ADD_TASK_TITLE_ARGVAR])
     note_fragments = args[ADD_TASK_NOTE_ARGVAR]

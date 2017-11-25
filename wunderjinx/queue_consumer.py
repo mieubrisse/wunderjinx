@@ -12,7 +12,8 @@ import time
 import argparse
 import os.path
 
-import config as wj_config
+# This should live in a different directory that's been added to the PYTHONPATH before this script runs
+import wunderjinx_config as wj_config
 import model as wj_model
 import list_resolver as wj_list_resolver
 
@@ -23,10 +24,11 @@ class WunderlistQueueConsumer:
     Pulls objects from a RabbitMQ queue containing Wunderlist actions and  executes the actions using the Wunderlist API 
     '''
 
-    def __init__(self, rabbitmq_host, wunderlist_access_token, wunderlist_client_id, queue):
+    def __init__(self, rabbitmq_host, rabbitmq_port, wunderlist_access_token, wunderlist_client_id, queue):
         ''' Create a new QueueConsumer connected to the given queue and Wunderlist account specified by the given access token and client iD '''
         self.queue = queue
         self.rabbitmq_host = rabbitmq_host
+        self.rabbitmq_port = rabbitmq_port
         self.wunderclient = wunderpy2.WunderApi().get_client(wunderlist_access_token, wunderlist_client_id)
 
         # TODO There's maaaaybe an issue with the fact that this isn't wrapped in mutexes... maybe
@@ -117,7 +119,7 @@ class WunderlistQueueConsumer:
 
     def consume(self):
         ''' Start continuously consuming queue actions '''
-        self.connection = pika.BlockingConnection(pika.ConnectionParameters(self.rabbitmq_host))
+        self.connection = pika.BlockingConnection(pika.ConnectionParameters(self.rabbitmq_host, self.rabbitmq_port))
         channel = self.connection.channel()
         channel.queue_declare(queue=self.queue, durable=True)
         # We want an ack'd queue, so messages won't be deleted until they're successfully on the Wunderlist server
@@ -131,13 +133,10 @@ class WunderlistQueueConsumer:
 
 
 # ---------- Runtime things ------------------
-CONFIG_FILEPATH_ARGVAR = "config_filepath"
 script_dir = os.path.dirname(os.path.realpath(__file__))
-default_config_filepath = os.path.join(script_dir, "config.yaml")
 
 def _parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config", dest=CONFIG_FILEPATH_ARGVAR, metavar="<config file>", default=default_config_filepath, help="YAML file to load configuration from")
     return vars(parser.parse_args())
 
 def _validate_args(args):
@@ -152,7 +151,8 @@ if __name__ == "__main__":
     client_id = wj_config.CLIENT_ID
     queue = wj_config.QUEUE
     rabbitmq_host = wj_config.RABBITMQ_HOST
-    consumer = WunderlistQueueConsumer(rabbitmq_host, access_token, client_id, queue)
+    rabbitmq_port = wj_config.RABBITMQ_PORT
+    consumer = WunderlistQueueConsumer(rabbitmq_host, rabbitmq_port, access_token, client_id, queue)
     try:
         print "------------ Queue consumer started! ------------------------------------"
         consumer.consume()
