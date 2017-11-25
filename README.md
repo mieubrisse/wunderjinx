@@ -16,6 +16,7 @@ NOTE: This is not even close to complete right now
 1. Create a new virtualenv for running wunderjinx: `pyenv virtualenv $LATEST_PYTHON_2 wunderjinx`
 1. Activate the virtualenv: `pyenv activate wunderjinx`
 1. Install Wunderjinx's dependencies: `pip install wunderpy2 parsedatetime pika`
+1. Deactivate the virtualenv: `pyenv deactivate`
 1. Install RabbitMQ with Homebrew: `brew install rabbitmq`
 1. Configure RabbitMQ to start on launch using the directions from Homebrew (use launchctl to load the .plist file in ~/Library/LaunchAgents)
 1. Create a config directory somewhere on your filesystem to house Wunderjinx config
